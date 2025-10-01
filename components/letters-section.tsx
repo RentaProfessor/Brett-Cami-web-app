@@ -50,16 +50,29 @@ export function LettersSection() {
   // Get the most recent letter for display
   const latestLetter = userRelevantLetters[0]
 
-  const handleSendLetter = async (letter: { recipient: string; subject: string; body: string }) => {
+  const handleSendLetter = async (letter: Omit<Letter, "id" | "timestamp" | "isRead">) => {
+    if (!user) {
+      console.error('User not authenticated')
+      return
+    }
+
     // Find recipient email from the name
     const recipientEmail = letter.recipient === "Brett" ? "brettchiate@gmail.com" : "cami@berkeley.edu"
+    
+    console.log('Sending letter:', { 
+      from: user.email, 
+      to: recipientEmail, 
+      subject: letter.subject, 
+      body: letter.body 
+    })
     
     const result = await sendLetter(recipientEmail, letter.subject, letter.body)
     
     if (result.success) {
-      console.log('Letter sent successfully!')
+      console.log('Letter sent successfully!', result.data)
     } else {
       console.error('Failed to send letter:', result.error)
+      // You could add a toast notification here for user feedback
     }
   }
 
