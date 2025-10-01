@@ -23,8 +23,8 @@ export function ComposeLetterModal({ isOpen, onClose, onSend }: ComposeLetterMod
   const { toast } = useToast()
   const { user } = useAuth()
   
-  // Get sender name from authenticated user
-  const sender = user?.user_metadata?.name || "Unknown"
+  // Get sender name from authenticated user email
+  const sender = user?.email === "brettchiate@gmail.com" ? "Brett" : "Cami"
   const recipient = sender === "Brett" ? "Cami" : "Brett"
 
   const maxChars = 1000
