@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Send } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/AuthProvider"
 import type { Letter } from "./letters-section"
 
 interface ComposeLetterModalProps {
@@ -18,10 +18,14 @@ interface ComposeLetterModalProps {
 }
 
 export function ComposeLetterModal({ isOpen, onClose, onSend }: ComposeLetterModalProps) {
-  const [sender, setSender] = useState<"Cami" | "Brett">("Cami")
   const [subject, setSubject] = useState("")
   const [body, setBody] = useState("")
   const { toast } = useToast()
+  const { user } = useAuth()
+  
+  // Get sender name from authenticated user
+  const sender = user?.user_metadata?.name || "Unknown"
+  const recipient = sender === "Brett" ? "Cami" : "Brett"
 
   const maxChars = 1000
   const charsRemaining = maxChars - body.length
@@ -37,8 +41,8 @@ export function ComposeLetterModal({ isOpen, onClose, onSend }: ComposeLetterMod
     }
 
     onSend({
-      sender,
-      recipient: sender === "Cami" ? "Brett" : "Cami",
+      sender: sender as "Cami" | "Brett",
+      recipient: recipient as "Cami" | "Brett",
       subject,
       body,
     })
@@ -72,15 +76,9 @@ export function ComposeLetterModal({ isOpen, onClose, onSend }: ComposeLetterMod
             <Label htmlFor="sender" className="font-sans">
               From
             </Label>
-            <Select value={sender} onValueChange={(value) => setSender(value as "Cami" | "Brett")}>
-              <SelectTrigger id="sender">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Cami">Cami</SelectItem>
-                <SelectItem value="Brett">Brett</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="p-3 bg-pink-100 rounded-md border border-pink-200">
+              <span className="font-medium text-pink-700">{sender}</span>
+            </div>
           </div>
 
           <div className="space-y-2">

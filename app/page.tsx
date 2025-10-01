@@ -5,7 +5,6 @@ import { StickyNav } from "@/components/sticky-nav"
 import { HomeSection } from "@/components/home-section"
 import { LettersSection } from "@/components/letters-section"
 import { CalendarSection } from "@/components/calendar-section"
-import { ArchiveSection } from "@/components/archive-section"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
@@ -18,7 +17,6 @@ export default function Home() {
         <HomeSection />
         <LettersSection />
         <CalendarSection />
-        <ArchiveSection />
       </main>
 
       <Footer />

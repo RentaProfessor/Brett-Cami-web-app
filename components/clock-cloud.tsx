@@ -9,15 +9,36 @@ interface ClockCloudProps {
 }
 
 export function ClockCloud({ name, timezone }: ClockCloudProps) {
-  const [time, setTime] = useState(new Date())
+  const [time, setTime] = useState<Date | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    setTime(new Date())
+    
     const interval = setInterval(() => {
       setTime(new Date())
     }, 1000)
 
     return () => clearInterval(interval)
   }, [])
+
+  if (!mounted || !time) {
+    return (
+      <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-xl border-2 border-pink-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-serif text-2xl md:text-3xl text-pink-600">{name} Time</h3>
+          <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="text-center space-y-2">
+          <div className="font-sans text-4xl md:text-5xl font-bold text-pink-700">
+            --:--:--
+          </div>
+          <div className="font-sans text-sm md:text-base text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    )
+  }
 
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,

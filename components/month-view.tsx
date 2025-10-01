@@ -1,14 +1,16 @@
 "use client"
 
+import { Trash2 } from "lucide-react"
 import type { CalendarEvent } from "./calendar-board"
 
 interface MonthViewProps {
   events: CalendarEvent[]
   currentDate: Date
   onSelectEvent: (event: CalendarEvent) => void
+  onDeleteEvent?: (id: string) => void
 }
 
-export function MonthView({ events, currentDate, onSelectEvent }: MonthViewProps) {
+export function MonthView({ events, currentDate, onSelectEvent, onDeleteEvent }: MonthViewProps) {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
 
@@ -70,13 +72,26 @@ export function MonthView({ events, currentDate, onSelectEvent }: MonthViewProps
 
               <div className="space-y-1">
                 {dayEvents.slice(0, 2).map((event) => (
-                  <button
-                    key={event.id}
-                    onClick={() => onSelectEvent(event)}
-                    className={`w-full text-left text-xs p-1 rounded ${event.color} text-white truncate hover:opacity-80`}
-                  >
-                    {event.title}
-                  </button>
+                  <div key={event.id} className="flex items-center gap-1">
+                    <button
+                      onClick={() => onSelectEvent(event)}
+                      className={`flex-1 text-left text-xs p-1 rounded ${event.color} text-white truncate hover:opacity-80`}
+                    >
+                      {event.title}
+                    </button>
+                    {onDeleteEvent && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDeleteEvent(event.id)
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1"
+                        title="Delete event"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
                 ))}
                 {dayEvents.length > 2 && (
                   <div className="text-xs text-muted-foreground">+{dayEvents.length - 2} more</div>

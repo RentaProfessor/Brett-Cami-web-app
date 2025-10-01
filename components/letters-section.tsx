@@ -8,6 +8,7 @@ import { RomanticQuotes } from "./romantic-quotes"
 import { ArchiveRibbon } from "./archive-ribbon"
 import { Button } from "@/components/ui/button"
 import { PenLine } from "lucide-react"
+import { useAuth } from "@/contexts/AuthProvider"
 
 export interface Letter {
   id: string
@@ -19,31 +20,24 @@ export interface Letter {
   isRead: boolean
 }
 
-const mockLetters: Letter[] = [
-  {
-    id: "1",
-    sender: "Cami",
-    recipient: "Brett",
-    subject: "Missing You",
-    body: "My dearest Brett,\n\nEvery moment without you feels like an eternity. I find myself thinking about our last video call and how your smile brightens even the cloudiest London day. Can't wait until we're together again.\n\nAll my love,\nCami 💕",
-    timestamp: new Date("2025-01-15T14:30:00"),
-    isRead: true,
-  },
-  {
-    id: "2",
-    sender: "Brett",
-    recipient: "Cami",
-    subject: "Good Morning Beautiful",
-    body: "Hey love,\n\nJust wanted to send you a quick note before you start your day. I know it's already afternoon there, but I hope you're having an amazing day. Counting down the days until I can hold you again.\n\nLove always,\nBrett ❤️",
-    timestamp: new Date("2025-01-20T08:15:00"),
-    isRead: true,
-  },
-]
+const mockLetters: Letter[] = []
 
 export function LettersSection() {
   const [letters, setLetters] = useState<Letter[]>(mockLetters)
   const [selectedLetter, setSelectedLetter] = useState<Letter | null>(null)
   const [isComposeOpen, setIsComposeOpen] = useState(false)
+  const { user } = useAuth()
+  
+  // Get current user name
+  const currentUserName = user?.user_metadata?.name || "Unknown"
+  
+  // Filter letters to show only those relevant to the current user
+  const userRelevantLetters = letters.filter(letter => 
+    letter.recipient === currentUserName || letter.sender === currentUserName
+  )
+  
+  // Get the most recent letter for display
+  const latestLetter = userRelevantLetters[0]
 
   const handleSendLetter = (letter: Omit<Letter, "id" | "timestamp" | "isRead">) => {
     const newLetter: Letter = {
@@ -63,10 +57,19 @@ export function LettersSection() {
         <RomanticQuotes />
 
         <div className="flex flex-col items-center gap-8">
-          <LoveCounter count={letters.length} />
+          <LoveCounter count={userRelevantLetters.length} />
 
           <div className="relative">
-            <Envelope letter={letters[0]} onOpen={() => setSelectedLetter(letters[0])} />
+            {latestLetter ? (
+              <Envelope letter={latestLetter} onOpen={() => setSelectedLetter(latestLetter)} />
+            ) : (
+              <div className="bg-gradient-to-br from-pink-200 to-pink-300 rounded-lg p-8 shadow-xl border-2 border-pink-400 text-center">
+                <div className="font-serif text-xl text-pink-700 mb-2">No messages yet</div>
+                <div className="font-sans text-sm text-pink-600">
+                  {currentUserName === "Brett" ? "No messages from Cami" : "No messages from Brett"}
+                </div>
+              </div>
+            )}
           </div>
 
           <Button
@@ -79,7 +82,7 @@ export function LettersSection() {
           </Button>
         </div>
 
-        <ArchiveRibbon letters={letters} onSelectLetter={setSelectedLetter} />
+        <ArchiveRibbon letters={userRelevantLetters} onSelectLetter={setSelectedLetter} />
 
         <ComposeLetterModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} onSend={handleSendLetter} />
 
@@ -96,7 +99,10 @@ export function LettersSection() {
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <div className="inline-block bg-pink-500 text-white px-4 py-1 rounded-full text-sm font-sans mb-2">
-                    From: {selectedLetter.sender}
+                    {selectedLetter.sender === currentUserName ? 
+                      `To: ${selectedLetter.recipient}` : 
+                      `From: ${selectedLetter.sender}`
+                    }
                   </div>
                   <h3 className="font-serif text-3xl text-pink-700">{selectedLetter.subject}</h3>
                 </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,11 +15,10 @@ interface EventModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (event: Omit<CalendarEvent, "id">) => void
-  onDelete?: (id: string) => void
   event?: CalendarEvent | null
 }
 
-export function EventModal({ isOpen, onClose, onSave, onDelete, event }: EventModalProps) {
+export function EventModal({ isOpen, onClose, onSave, event }: EventModalProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [location, setLocation] = useState("")
@@ -77,13 +76,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, event }: EventMo
     onClose()
   }
 
-  const handleDelete = () => {
-    if (event && onDelete) {
-      onDelete(event.id)
-      onClose()
-    }
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-white">
@@ -91,9 +83,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, event }: EventMo
           <DialogTitle className="font-serif text-2xl text-pink-600">
             {event ? "Edit Event" : "Add New Event"}
           </DialogTitle>
-          <DialogDescription>
-            {event ? "Update the details of your event below." : "Fill in the details to create a new event."}
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -175,15 +164,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, event }: EventMo
             <Button onClick={onClose} variant="outline" className="flex-1 bg-transparent">
               Cancel
             </Button>
-            {event && onDelete && (
-              <Button 
-                onClick={handleDelete} 
-                variant="outline" 
-                className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-              >
-                Delete
-              </Button>
-            )}
           </div>
         </div>
       </DialogContent>

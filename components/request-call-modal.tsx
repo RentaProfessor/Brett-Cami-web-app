@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Phone } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/AuthProvider"
 
 interface RequestCallModalProps {
   isOpen: boolean
@@ -15,11 +16,14 @@ interface RequestCallModalProps {
 }
 
 export function RequestCallModal({ isOpen, onClose }: RequestCallModalProps) {
-  const [from, setFrom] = useState<"Cami" | "Brett">("Cami")
   const [duration, setDuration] = useState("60")
   const [preferredDate, setPreferredDate] = useState("")
   const [preferredTime, setPreferredTime] = useState("")
   const { toast } = useToast()
+  const { user } = useAuth()
+  
+  // Get requester name from authenticated user
+  const from = user?.user_metadata?.name || "Unknown"
 
   const handleSend = () => {
     if (!preferredDate || !preferredTime) {
@@ -52,15 +56,9 @@ export function RequestCallModal({ isOpen, onClose }: RequestCallModalProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="from">From</Label>
-            <Select value={from} onValueChange={(v) => setFrom(v as any)}>
-              <SelectTrigger id="from">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Cami">Cami</SelectItem>
-                <SelectItem value="Brett">Brett</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="p-3 bg-pink-100 rounded-md border border-pink-200">
+              <span className="font-medium text-pink-700">{from}</span>
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -1,20 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, Heart } from "lucide-react"
+import { Menu, X, Heart, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useAuth } from "@/contexts/AuthProvider"
 
 const navItems = [
   { label: "Home", href: "#home" },
   { label: "Letters", href: "#letters" },
   { label: "Calendar", href: "#calendar" },
-  { label: "Archive", href: "#archive" },
 ]
 
 export function StickyNav() {
   const [activeSection, setActiveSection] = useState("home")
   const [isOpen, setIsOpen] = useState(false)
+  const { user, signOut } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,6 +68,19 @@ export function StickyNav() {
                 {item.label}
               </button>
             ))}
+            {user && (
+              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-pink-200">
+                <span className="text-sm text-pink-600">Hi, {user.user_metadata?.name || user.email}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={signOut}
+                  className="text-pink-600 hover:text-pink-700 hover:bg-pink-50"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Navigation */}
@@ -91,6 +105,23 @@ export function StickyNav() {
                     {item.label}
                   </button>
                 ))}
+                {user && (
+                  <div className="border-t border-pink-200 pt-4 mt-4">
+                    <div className="text-sm text-pink-600 px-4 mb-2">
+                      Hi, {user.user_metadata?.name || user.email}
+                    </div>
+                    <button
+                      onClick={() => {
+                        signOut()
+                        setIsOpen(false)
+                      }}
+                      className="font-sans text-lg font-medium text-left py-2 px-4 rounded-lg transition-colors text-foreground hover:bg-pink-50 flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>

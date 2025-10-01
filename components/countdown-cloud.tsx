@@ -1,46 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useCountdown } from "@/hooks/useCountdown"
 
 export function CountdownCloud() {
-  const [targetDate, setTargetDate] = useState(new Date("2025-12-25T00:00:00"))
-  const [countdown, setCountdown] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  })
+  const { countdown, targetDate, loading, updateReunionDate } = useCountdown()
   const [isOpen, setIsOpen] = useState(false)
   const [dateInput, setDateInput] = useState("")
+  const [updating, setUpdating] = useState(false)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date().getTime()
-      const distance = targetDate.getTime() - now
-
-      if (distance > 0) {
-        setCountdown({
-          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((distance % (1000 * 60)) / 1000),
-        })
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [targetDate])
-
-  const handleDateChange = () => {
+  const handleDateChange = async () => {
     if (dateInput) {
-      setTargetDate(new Date(dateInput))
-      setIsOpen(false)
+      setUpdating(true)
+      const success = await updateReunionDate(new Date(dateInput))
+      if (success) {
+        setIsOpen(false)
+        setDateInput("")
+      }
+      setUpdating(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="relative">
+        <div className="bg-white/90 backdrop-blur-sm rounded-[3rem] p-8 md:p-12 shadow-2xl border-4 border-pink-200">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+            <p className="text-pink-600 font-medium">Loading countdown...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -90,8 +86,12 @@ export function CountdownCloud() {
                   onChange={(e) => setDateInput(e.target.value)}
                 />
               </div>
-              <Button onClick={handleDateChange} className="w-full bg-pink-500 hover:bg-pink-600 text-white">
-                Save Date
+              <Button 
+                onClick={handleDateChange} 
+                className="w-full bg-pink-500 hover:bg-pink-600 text-white"
+                disabled={updating}
+              >
+                {updating ? 'Saving...' : 'Save Date'}
               </Button>
             </div>
           </DialogContent>

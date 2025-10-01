@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Mail } from "lucide-react"
+import { useAuth } from "@/contexts/AuthProvider"
 import type { Letter } from "./letters-section"
 
 interface EnvelopeProps {
@@ -11,7 +12,10 @@ interface EnvelopeProps {
 
 export function Envelope({ letter, onOpen }: EnvelopeProps) {
   const [isOpening, setIsOpening] = useState(false)
-
+  const { user } = useAuth()
+  
+  const currentUserName = user?.user_metadata?.name || "Unknown"
+  
   const handleClick = () => {
     setIsOpening(true)
     setTimeout(() => {
@@ -29,7 +33,12 @@ export function Envelope({ letter, onOpen }: EnvelopeProps) {
       >
         <Mail className="w-24 h-24 text-pink-600 mx-auto" />
         <div className="mt-4 text-center">
-          <div className="font-serif text-xl text-pink-700">From {letter.sender}</div>
+          <div className="font-serif text-xl text-pink-700">
+            {letter.sender === currentUserName ? 
+              `To ${letter.recipient}` : 
+              `From ${letter.sender}`
+            }
+          </div>
           <div className="font-sans text-sm text-pink-600 mt-1">Click to open</div>
         </div>
       </div>
