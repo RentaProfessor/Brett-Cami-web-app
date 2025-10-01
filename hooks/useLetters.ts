@@ -81,10 +81,18 @@ export function useLetters() {
   }
 
   const sendLetter = async (recipientEmail: string, subject: string, content: string) => {
-    if (!user) return { success: false, error: 'Not authenticated' }
+    console.log('useLetters: sendLetter called with:', { recipientEmail, subject, content })
+    
+    if (!user) {
+      console.log('useLetters: User not authenticated')
+      return { success: false, error: 'Not authenticated' }
+    }
+
+    console.log('useLetters: User authenticated:', user.email)
 
     try {
       // Get recipient profile
+      console.log('useLetters: Looking up recipient profile for:', recipientEmail)
       const { data: recipient, error: recipientError } = await supabase
         .from('profiles')
         .select('id')
@@ -92,10 +100,14 @@ export function useLetters() {
         .single()
 
       if (recipientError || !recipient) {
+        console.error('useLetters: Recipient lookup failed:', recipientError)
         return { success: false, error: 'Recipient not found' }
       }
 
+      console.log('useLetters: Recipient found:', recipient.id)
+
       // Insert letter
+      console.log('useLetters: Inserting letter into database')
       const { data, error } = await supabase
         .from('letters')
         .insert({
@@ -108,16 +120,18 @@ export function useLetters() {
         .single()
 
       if (error) {
-        console.error('Error sending letter:', error)
+        console.error('useLetters: Error sending letter:', error)
         return { success: false, error: error.message }
       }
+
+      console.log('useLetters: Letter inserted successfully:', data)
 
       // Optimistically update local state
       setLetters(prev => [data, ...prev])
 
       return { success: true, data }
     } catch (error) {
-      console.error('Error sending letter:', error)
+      console.error('useLetters: Exception sending letter:', error)
       return { success: false, error: 'Failed to send letter' }
     }
   }

@@ -31,7 +31,11 @@ export function ComposeLetterModal({ isOpen, onClose, onSend }: ComposeLetterMod
   const charsRemaining = maxChars - body.length
 
   const handleSend = () => {
+    console.log('ComposeLetterModal: handleSend called')
+    console.log('Form data:', { subject, body, sender, recipient })
+    
     if (!subject.trim() || !body.trim()) {
+      console.log('ComposeLetterModal: Form validation failed')
       toast({
         title: "Incomplete letter",
         description: "Please fill in both subject and message.",
@@ -40,12 +44,15 @@ export function ComposeLetterModal({ isOpen, onClose, onSend }: ComposeLetterMod
       return
     }
 
-    onSend({
+    const letterData = {
       sender: sender as "Cami" | "Brett",
       recipient: recipient as "Cami" | "Brett",
       subject,
       body,
-    })
+    }
+    
+    console.log('ComposeLetterModal: Calling onSend with:', letterData)
+    onSend(letterData)
 
     toast({
       title: "Sent with love 💕",
