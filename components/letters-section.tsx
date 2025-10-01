@@ -9,44 +9,58 @@ import { ArchiveRibbon } from "./archive-ribbon"
 import { Button } from "@/components/ui/button"
 import { PenLine } from "lucide-react"
 import { useAuth } from "@/contexts/AuthProvider"
+import { useLetters, Letter as DatabaseLetter } from "@/hooks/useLetters"
 
+// Display interface for the UI components
 export interface Letter {
   id: string
-  sender: "Cami" | "Brett"
-  recipient: "Cami" | "Brett"
+  sender: string
+  recipient: string
   subject: string
   body: string
   timestamp: Date
   isRead: boolean
 }
 
-const mockLetters: Letter[] = []
-
 export function LettersSection() {
-  const [letters, setLetters] = useState<Letter[]>(mockLetters)
   const [selectedLetter, setSelectedLetter] = useState<Letter | null>(null)
   const [isComposeOpen, setIsComposeOpen] = useState(false)
   const { user } = useAuth()
+  const { letters, loading, sendLetter } = useLetters()
   
   // Get current user name
-  const currentUserName = user?.user_metadata?.name || "Unknown"
+  const currentUserName = user?.user_metadata?.name || user?.email?.split('@')[0] || "Unknown"
+  
+  // Convert database letters to display format
+  const displayLetters: Letter[] = letters.map(letter => ({
+    id: letter.id,
+    sender: letter.sender?.name || letter.sender?.email?.split('@')[0] || "Unknown",
+    recipient: letter.recipient?.name || letter.recipient?.email?.split('@')[0] || "Unknown",
+    subject: letter.subject,
+    body: letter.content,
+    timestamp: new Date(letter.created_at),
+    isRead: !!letter.opened_at
+  }))
   
   // Filter letters to show only those relevant to the current user
-  const userRelevantLetters = letters.filter(letter => 
+  const userRelevantLetters = displayLetters.filter(letter => 
     letter.recipient === currentUserName || letter.sender === currentUserName
   )
   
   // Get the most recent letter for display
   const latestLetter = userRelevantLetters[0]
 
-  const handleSendLetter = (letter: Omit<Letter, "id" | "timestamp" | "isRead">) => {
-    const newLetter: Letter = {
-      ...letter,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      isRead: false,
+  const handleSendLetter = async (letter: { recipient: string; subject: string; body: string }) => {
+    // Find recipient email from the name
+    const recipientEmail = letter.recipient === "Brett" ? "brettchiate@gmail.com" : "cami@berkeley.edu"
+    
+    const result = await sendLetter(recipientEmail, letter.subject, letter.body)
+    
+    if (result.success) {
+      console.log('Letter sent successfully!')
+    } else {
+      console.error('Failed to send letter:', result.error)
     }
-    setLetters([newLetter, ...letters])
   }
 
   return (
@@ -60,7 +74,11 @@ export function LettersSection() {
           <LoveCounter count={userRelevantLetters.length} />
 
           <div className="relative">
-            {latestLetter ? (
+            {loading ? (
+              <div className="bg-gradient-to-br from-pink-200 to-pink-300 rounded-lg p-8 shadow-xl border-2 border-pink-400 text-center">
+                <div className="font-serif text-xl text-pink-700 mb-2">Loading letters...</div>
+              </div>
+            ) : latestLetter ? (
               <Envelope letter={latestLetter} onOpen={() => setSelectedLetter(latestLetter)} />
             ) : (
               <div className="bg-gradient-to-br from-pink-200 to-pink-300 rounded-lg p-8 shadow-xl border-2 border-pink-400 text-center">
