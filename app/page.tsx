@@ -6,6 +6,7 @@ import { HomeSection } from "@/components/home-section"
 import { LettersSection } from "@/components/letters-section"
 import { CalendarSection } from "@/components/calendar-section"
 import { Footer } from "@/components/footer"
+import { EnvDebug } from "@/components/EnvDebug"
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       </main>
 
       <Footer />
+      <EnvDebug />
     </div>
   )
 }
