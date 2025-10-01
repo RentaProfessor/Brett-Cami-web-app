@@ -220,4 +220,4 @@ This project is private and intended for personal use by Cami & Brett.
 
 ---
 
-Built with ❤️ for long-distance love
+Built with ❤️ for long-distance love# Environment variables configured for Cloudflare Pages
